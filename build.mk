@@ -26,6 +26,7 @@ endif
 
 %.a:
 	ar rcs $@ $^
+	ranlib $@
 %.so:
 	$(CC) $(LDFLAGS) -shared $^ $(LOADLIBES) $(LDLIBS) -o $@
 %.dylib:

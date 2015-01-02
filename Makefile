@@ -24,32 +24,22 @@ progs = src/basename \
 	src/uname \
 	src/unlink
 
+SRCS=$(wildcard src/*.c src/*/*.c)
+OBJS=$(SRCS:.c=.o)
+
+UTIL_SRCS=$(wildcard src/util/*.c)
+UTIL_OBJS=$(UTIL_SRCS:.c=.o)
+
 all: $(progs)
 
+CPPFLAGS += -Iinclude
 
-src/basename: src/basename.c
-src/cat:      src/cat.c
-src/cksum:    src/cksum.c
-src/dirname:  src/dirname.c
-src/dmesg:    src/dmesg.c
-src/echo:     src/echo.c
-src/env:      src/env.c
-src/false:    src/false.c
-src/groups:   src/groups.c
-src/hostname: src/hostname.c
-src/link:     src/link.c
-src/logger:   src/logger.c
-src/mesg:     src/mesg.c
-src/nice:     src/nice.c
-src/nohup:    src/nohup.c
-src/sleep:    src/sleep.c
-src/sum:      src/sum.c
-src/sync:     src/sync.c
-src/tee:      src/tee.c
-src/true:     src/true.c
-src/tty:      src/tty.c
-src/uname:    src/uname.c
-src/unlink:   src/unlink.c
+src/util.a: $(UTIL_OBJS)
+
+src/%: src/%.o src/util.a
+	$(CC) $(LDFLAGS) -o $@ $< src/util.a $(LDLIBS)
 
 clean:
 	-rm -f $(progs)
+	-rm -f $(OBJS)
+	-rm -f src/util.a
