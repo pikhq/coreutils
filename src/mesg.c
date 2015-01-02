@@ -6,19 +6,7 @@
 #include <sys/stat.h>
 #include <limits.h>
 
-static int my_write(int fd, char *s, size_t l)
-{
-	while(l) {
-		ssize_t n;
-		errno = 0;
-		n = write(fd, s, l);
-		if(n < 0 && errno == EINTR) continue;
-		if(n < 0) return -1;
-		s += n;
-		l -= n;
-	}
-	return 0;
-}
+#include "util.h"
 
 int main(int argc, char **argv)
 {
@@ -46,12 +34,14 @@ int main(int argc, char **argv)
 	if(stat(tty, &st) < 0) goto do_error;
 
 	if(!n) {
-		if(my_write(1, (char[]){'i', 's', ' ', st.st_mode & 0020 ? 'y' : 'n', '\n'}, 5) < 0)
+		if(write_fd(1, (char[]){'i', 's', ' ', st.st_mode & 0020 ? 'y' : 'n', '\n'}, 5) < 5)
 			goto do_error;
 	} else {
 		mode_t mode = v[0][0] == 'n' ? st.st_mode & ~(mode_t)0020 : st.st_mode | 0020;
 		if(chmod(tty, mode) < 0) goto do_error;
 	}
+
+	return 0;
 
 do_error:
 	err = strerror(errno);

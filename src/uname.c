@@ -5,16 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-static int my_write(int fd, char *s, size_t l)
-{
-	while(l) {
-		ssize_t n = write(fd, s, l);
-		if(n < 0 && errno == EINTR) continue;
-		if(n < 0) return -1;
-		s += n; l -= n;
-	}
-	return 0;
-}
+#include "util.h"
 
 static void my_perror(char *prog)
 {
@@ -28,9 +19,9 @@ static void my_perror(char *prog)
 static void uname_entry(char *prog, int *any_wrote, char *entry)
 {
 	if(*any_wrote)
-		if(my_write(1, " ", 1) < 0) { my_perror(prog); exit(1); }
+		if(write_fd(1, " ", 1) < 1) { my_perror(prog); exit(1); }
 	*any_wrote = 1;
-	if(my_write(1, entry, strlen(entry)) < 0) { my_perror(prog); exit(1); }
+	if(write_fd(1, entry, strlen(entry)) < strlen(entry)) { my_perror(prog); exit(1); }
 }
 
 int main(int argc, char **argv)
@@ -72,5 +63,5 @@ int main(int argc, char **argv)
 		uname_entry(argv[0], &any_wrote, name.version);
 	if(opt_m || opt_a)
 		uname_entry(argv[0], &any_wrote, name.machine);
-	if(my_write(1, "\n", 1) < 0) { my_perror(argv[0]); return 1; }
+	if(write_fd(1, "\n", 1) < 1) { my_perror(argv[0]); return 1; }
 }

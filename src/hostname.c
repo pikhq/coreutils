@@ -5,16 +5,7 @@
 #include <stdlib.h>
 #include <limits.h>
 
-static int my_write(int fd, char *s, size_t l)
-{
-	while(l) {
-		ssize_t n = write(fd, s, l);
-		if(n < 0 && errno == EINTR) continue;
-		if(n < 0) return -1;
-		s += n; l -= n;
-	}
-	return 0;
-}
+#include "util.h"
 
 static void die(char *prog)
 {
@@ -35,9 +26,10 @@ int main(int argc, char **argv)
 	if(c && v[0][0] == '-' && v[0][1] == '-' && !v[0][2]) { c--; v++; }
 
 	if(!c) {
+		size_t name_len = strnlen(name, HOST_NAME_MAX);
 		if(gethostname(name, HOST_NAME_MAX) < 0) die(argv[0]);
-		if(my_write(1, name, strnlen(name, HOST_NAME_MAX)) < 0) die(argv[0]);
-		if(my_write(1, "\n", 1) < 0) die(argv[0]);
+		if(write_fd(1, name, name_len) < name_len) die(argv[0]);
+		if(write_fd(1, "\n", 1) < 1) die(argv[0]);
 	} else {
 		if(sethostname(v[0], strlen(v[0])) < 0) die(argv[0]);
 	}

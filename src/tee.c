@@ -7,16 +7,7 @@
 #include <errno.h>
 #include <signal.h>
 
-static int my_write(int fd, const char *str, size_t len)
-{
-	while(len) {
-		ssize_t n = write(fd, str, len);
-		if(n < 0 && errno == EINTR) continue;
-		if(n < 0) return n;
-		str += n; len -= n;
-	}
-	return 0;
-}
+#include "util.h"
 
 static void my_perror(char *prog, char *msg)
 {
@@ -72,7 +63,7 @@ int main(int argc, char **argv)
 	while((len = read(0, buf, sizeof buf)) > 0) {
 		for(i = 0; i < n + 1; i++) {
 			if(fds[i] < 0) continue;
-			if(my_write(fds[i], buf, len) < 0) {
+			if(write_fd(fds[i], buf, len) < len) {
 				fds[i] = -1;
 				my_perror(argv[0], "write error");
 				ret = 1;

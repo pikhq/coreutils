@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
+
+#include "util.h"
+
 extern char **environ;
 
 static void my_perror(char *prog)
@@ -13,18 +16,6 @@ static void my_perror(char *prog)
         write(2, err, strlen(err));
         write(2, "\n", 1);
 }
-
-static int my_write(int fd, const char *str, size_t len)
-{
-        while(len) {
-                ssize_t n = write(fd, str, len);
-                if(n < 0 && errno == EINTR) continue;
-                if(n < 0) return -1;
-                str += n; len -= n;
-        }
-        return 0;
-}
-
 
 int main(int argc, char **argv)
 {
@@ -56,8 +47,9 @@ int main(int argc, char **argv)
 		return errno != ENOENT ? 126 : 127;
 	}
 	for(n = 0; environ && environ[n]; n++) {
-		if(   my_write(1, environ[n], strlen(environ[n])) < 0
-		   || my_write(1, "\n", 1) < 0) {
+		if(write_fd(1, environ[n], strlen(environ[n]))
+		      < strlen(environ[n])
+		   || write_fd(1, "\n", 1) < 1) {
 			my_perror(argv[0]);
 			return 1;
 		}

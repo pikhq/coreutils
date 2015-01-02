@@ -9,20 +9,11 @@
 #include <limits.h>
 #include <locale.h>
 
+#include "util.h"
+
 #if !defined(PATH_MAX)
 #define PATH_MAX _POSIX_PATH_MAX
 #endif
-
-static int my_write(int fd, const char *str, size_t len)
-{
-	while(len) {
-		ssize_t n = write(fd, str, len);
-		if(n < 0 && errno == EINTR) continue;
-		if(n < 0) return -1;
-		str += n; len -= n;
-	}
-	return 0;
-}
 
 int main(int argc, char **argv)
 {
@@ -54,8 +45,8 @@ int main(int argc, char **argv)
 			if(fd < 0) return 127;
 		}
 		umask(umask_val);
-		my_write(2, tmp, strlen(tmp));
-		my_write(2, "\n", 1);
+		write_fd(2, tmp, strlen(tmp));
+		write_fd(2, "\n", 1);
 	}
 	if(isatty(1))
 		if(dup2(fd, 1) < 0) return 127;

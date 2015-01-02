@@ -5,16 +5,7 @@
 #include <errno.h>
 #include <unistd.h>
 
-static int my_write(int fd, const char *str, size_t len)
-{
-        while(len) {
-                ssize_t n = write(fd, str, len);
-                if(n < 0 && errno != EINTR) continue;
-                if(n < 0) return -1;
-                str += n; len -= n;
-        }
-        return 0;
-}
+#include "util.h"
 
 static void my_perror(char *prog)
 {
@@ -45,8 +36,8 @@ int main(int argc, char **argv)
 
 	str = dirname(v[0]);
 
-	if(   my_write(1, str, strlen(str)) < 0
-	   || my_write(1, "\n", 1) < 0) {
+	if(write_fd(1, str, strlen(str)) < strlen(str)
+	   || write_fd(1, "\n", 1) < 1) {
 		my_perror(argv[0]);
 		return 1;
 	}

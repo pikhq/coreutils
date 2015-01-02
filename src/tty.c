@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include "util.h"
+
 static int my_write(int fd, char *s, size_t l)
 {
 	while(l) {
@@ -41,7 +43,7 @@ int main(int argc, char **argv)
 
 	if(!tty) errorout(argv[0]);
 
-	if(my_write(1, tty, strlen(tty)) < 0) errorout(argv[0]);
-	if(my_write(1, "\n", 1) < 0) errorout(argv[0]);
+	if(write_fd(1, tty, strlen(tty)) < strlen(tty)) errorout(argv[0]);
+	if(write_fd(1, "\n", 1) < 1) errorout(argv[0]);
 	return ret;
 }

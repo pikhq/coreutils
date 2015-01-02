@@ -5,6 +5,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "util.h"
+
 static void my_perror(char *prog, char *msg)
 {
 	char *err = strerror(errno);
@@ -53,12 +55,9 @@ int main(int argc, char **argv)
 			continue;
 		}
 		while((len = read(fd, buf, sizeof buf)) > 0) {
-			char *s = buf;
-			while(len) {
-				ssize_t n = write(1, s, len);
-				if(n < 0 && errno == EINTR) continue;
-				if(n < 0) { my_perror(argv[0], "write error"); return 1; }
-				s += n; len -= n;
+			if(write_fd(fd, buf, len) < len) {
+				my_perror(argv[0], "write error");
+				return 1;
 			}
 		}
 		if(len) {
