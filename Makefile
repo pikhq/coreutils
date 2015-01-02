@@ -1,28 +1,7 @@
 include build.mk
 
-progs = src/basename \
-	src/cat \
-	src/cksum \
-	src/dirname \
-	src/dmesg \
-	src/echo \
-	src/env \
-	src/false \
-	src/groups \
-	src/hostname \
-	src/link \
-	src/logger \
-	src/mesg \
-	src/nice \
-	src/nohup \
-	src/sleep \
-	src/sum \
-	src/sync \
-	src/tee \
-	src/true \
-	src/tty \
-	src/uname \
-	src/unlink
+PROGS_SRCS=$(wildcard src/*.c)
+PROGS=$(PROGS_SRCS:.c=)
 
 SRCS=$(wildcard src/*.c src/*/*.c)
 OBJS=$(SRCS:.c=.o)
@@ -30,7 +9,7 @@ OBJS=$(SRCS:.c=.o)
 UTIL_SRCS=$(wildcard src/util/*.c)
 UTIL_OBJS=$(UTIL_SRCS:.c=.o)
 
-all: $(progs)
+all: $(PROGS)
 
 CPPFLAGS += -Iinclude
 
@@ -40,6 +19,6 @@ src/%: src/%.o src/util.a
 	$(CC) $(LDFLAGS) -o $@ $< src/util.a $(LDLIBS)
 
 clean:
-	-rm -f $(progs)
+	-rm -f $(PROGS)
 	-rm -f $(OBJS)
 	-rm -f src/util.a

@@ -1,3 +1,4 @@
+#if 0
 struct entry {
 	int name;
 	char *str;
@@ -146,3 +147,8 @@ struct entry sysconf_tab[] = {
 	{_SC_XOPEN_UUCP,		"_XOPEN_UUCP"},
 	{_SC_XOPEN_VERSION,		"_XOPEN_VERSION"}
 };
+#endif
+int main()
+{
+	return 1;
+}
