@@ -41,7 +41,7 @@ struct limit_entry {
 	char *str;
 };
 
-struct conf_entry pathconf_tab[] = {
+static const struct conf_entry pathconf_tab[] = {
 	{_PC_FILESIZEBITS,		"FILESIZEBITS"},
 	{_PC_LINK_MAX,			"LINK_MAX"},
 	{_PC_MAX_CANON,			"MAX_CANON"},
@@ -68,7 +68,7 @@ struct conf_entry pathconf_tab[] = {
 	{}
 };
 
-struct conf_entry sysconf_tab[] = {
+static const struct conf_entry sysconf_tab[] = {
 	{_SC_AIO_LISTIO_MAX,		"AIO_LISTIO_MAX"},
 	{_SC_AIO_MAX,			"AIO_MAX"},
 	{_SC_AIO_PRIO_DELTA_MAX,	"AIO_PRIO_DELTA_MAX"},
@@ -206,7 +206,7 @@ struct conf_entry sysconf_tab[] = {
 	{}
 };
 
-struct conf_entry confstr_tab[] = {
+static const struct conf_entry confstr_tab[] = {
 	{_CS_PATH,				"PATH"},
 	{_CS_POSIX_V7_ILP32_OFF32_CFLAGS,	"POSIX_V7_ILP32_OFF32_CFLAGS"},
 	{_CS_POSIX_V7_ILP32_OFF32_LDFLAGS,	"POSIX_V7_ILP32_OFF32_LDFLAGS"},
@@ -255,7 +255,7 @@ struct conf_entry confstr_tab[] = {
 	{}
 };
 
-struct limit_entry limits_tab[] = {
+static const struct limit_entry limits_tab[] = {
 	{_POSIX2_BC_BASE_MAX,			"POSIX2_BC_BASE_MAX"},
 	{_POSIX2_BC_DIM_MAX,			"POSIX2_BC_DIM_MAX"},
 	{_POSIX2_BC_SCALE_MAX,			"POSIX2_BC_SCALE_MAX"},
@@ -318,7 +318,7 @@ struct limit_entry limits_tab[] = {
 	{}
 };
 
-char *undef_tab[] = {
+static const char *undef_tab[] = {
 #ifndef _PC_TIMESTAMP_RESOLUTION
 	"_POSIX_TIMESTAMP_RESOLUTION",
 #endif
@@ -421,7 +421,7 @@ int main(int argc, char **argv)
 	}
 
 	if(n == 2) {
-		for(struct conf_entry *entry = pathconf_tab; entry->str; entry++) {
+		for(const struct conf_entry *entry = pathconf_tab; entry->str; entry++) {
 			if(strcmp(entry->str, v[0]) == 0) {
 				errno = 0;
 				write_limit(pathconf(v[1], entry->name));
@@ -430,7 +430,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-	for(struct conf_entry *entry = sysconf_tab; entry->str; entry++) {
+	for(const struct conf_entry *entry = sysconf_tab; entry->str; entry++) {
 		if(strcmp(entry->str, v[0]) == 0) {
 			errno = 0;
 			write_limit(sysconf(entry->name));
@@ -438,7 +438,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-	for(struct conf_entry *entry = confstr_tab; entry->str; entry++) {
+	for(const struct conf_entry *entry = confstr_tab; entry->str; entry++) {
 		if(strcmp(entry->str, v[0]) == 0) {
 			errno = 0;
 			size_t len = confstr(entry->name, 0, 0);
@@ -461,14 +461,14 @@ int main(int argc, char **argv)
 		}
 	}
 
-	for(struct limit_entry *entry = limits_tab; entry->str; entry++) {
+	for(const struct limit_entry *entry = limits_tab; entry->str; entry++) {
 		if(strcmp(entry->str, v[0]) == 0) {
 			printf_die("%d\n", entry->value);
 			return 0;
 		}
 	}
 
-	for(char **entry = undef_tab; *entry; entry++) {
+	for(const char **entry = undef_tab; *entry; entry++) {
 		if(strcmp(*entry, v[0]) == 0) {
 			printf_die("undefined\n");
 			return 0;
