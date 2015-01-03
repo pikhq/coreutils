@@ -1,4 +1,3 @@
-#define _XOPEN_SOURCE 700
 #include <sys/utsname.h>
 #include <unistd.h>
 #include <errno.h>

@@ -1,4 +1,3 @@
-#define _XOPEN_SOURCE 700
 #include <string.h>
 #include <libgen.h>
 #include <locale.h>

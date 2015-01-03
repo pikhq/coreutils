@@ -1,4 +1,3 @@
-#define _XOPEN_SOURCE 700
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <signal.h>

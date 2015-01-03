@@ -11,7 +11,7 @@ UTIL_OBJS=$(UTIL_SRCS:.c=.o)
 
 all: $(PROGS)
 
-CPPFLAGS += -Iinclude
+CPPFLAGS += -Iinclude -D_XOPEN_SOURCE=700 -D_FILE_OFFSET_BITS=64
 
 src/util.a: $(UTIL_OBJS)
 
