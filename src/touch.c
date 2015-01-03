@@ -39,6 +39,7 @@ int main(int argc, char **argv)
 			break;
 		case 'd':
 			date_string = optarg;
+			ref_file = time_string = 0;
 			break;
 		case 'm':
 			def_time = false;
@@ -46,9 +47,11 @@ int main(int argc, char **argv)
 			break;
 		case 'r':
 			ref_file = optarg;
+			date_string = time_string = 0;
 			break;
 		case 't':
 			time_string = optarg;
+			date_string = ref_file = 0;
 			break;
 		default:
 			return 1;
@@ -89,34 +92,21 @@ int main(int argc, char **argv)
 		}
 
 		if(*end == 'Z') {
-			char *tz;
-			tz = getenv("TZ");
-			if(tz) {
-				tz = strdup(tz);
-				if(!tz) {
-					perror(argv[0]);
-					return 1;
-				}
-			}
+			end++;
 			setenv("TZ", "UTC0", 1);
 			tzset();
-			timespec[0].tv_sec = mktime(&tm);
-			if(timespec[0].tv_sec == -1) {
-				perror(argv[0]);
-				return 1;
-			}
-			if(tz) {
-				setenv("TZ", tz, 1);
-			} else {
-				unsetenv("TZ");
-			}
-			tzset();
-		} else {
-			timespec[0].tv_sec = mktime(&tm);
-			if(timespec[0].tv_sec == -1) {
-				perror(argv[0]);
-				return 1;
-			}
+		}
+
+		if(*end) {
+			errno = EINVAL;
+			perror(argv[0]);
+			return 1;
+		}
+
+		timespec[0].tv_sec = mktime(&tm);
+		if(timespec[0].tv_sec == -1) {
+			perror(argv[0]);
+			return 1;
 		}
 		timespec[1] = timespec[0];
 	} else if(time_string) {
@@ -158,7 +148,8 @@ int main(int argc, char **argv)
 	v = argv + optind;
 
 	for(; n; v++, n--) {
-		int fd = open(*v, O_CREAT|O_WRONLY, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH);
+
+		int fd = open(*v, create_file ? O_CREAT : 0|O_WRONLY, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH);
 		if(fd != -1) {
 			if(futimens(fd, timespec) == -1) {
 				perror(argv[0]);
@@ -169,6 +160,9 @@ int main(int argc, char **argv)
 				perror(argv[0]);
 				return 1;
 			}
+		} else if(errno != ENOENT || create_file) {
+			perror(argv[0]);
+			return 1;
 		}
 	}
 
