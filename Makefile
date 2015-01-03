@@ -13,6 +13,8 @@ all: $(PROGS)
 
 CPPFLAGS += -Iinclude -D_XOPEN_SOURCE=700 -D_FILE_OFFSET_BITS=64
 
+$(OBJS): $(wildcard include/*.h)
+
 src/util.a: $(UTIL_OBJS)
 
 src/%: src/%.o src/util.a
