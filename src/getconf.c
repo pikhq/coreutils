@@ -33,12 +33,12 @@
 
 struct conf_entry {
 	int name;
-	char *str;
+	const char *str;
 };
 
 struct limit_entry {
 	int value;
-	char *str;
+	const char *str;
 };
 
 static const struct conf_entry pathconf_tab[] = {
