@@ -1,10 +1,48 @@
-#if 0
-struct entry {
+#define _XOPEN_SOURCE 700
+#include <unistd.h>
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <string.h>
+#include <errno.h>
+#include <locale.h>
+
+#ifndef _POSIX_SS_REPL_MAX
+#define _POSIX_SS_REPL_MAX 4
+#endif
+#ifndef _POSIX_TRACE_EVENT_NAME_MAX
+#define _POSIX_TRACE_EVENT_NAME_MAX 30
+#endif
+#ifndef _POSIX_TRACE_NAME_MAX
+#define _POSIX_TRACE_NAME_MAX 8
+#endif
+#ifndef _POSIX_TRACE_SYS_MAX
+#define _POSIX_TRACE_SYS_MAX 8
+#endif
+#ifndef _POSIX_TRACE_USER_EVENT_MAX
+#define _POSIX_TRACE_USER_EVENT_MAX 32
+#endif
+#undef _XOPEN_IOV_MAX
+#define _XOPEN_IOV_MAX 16
+#ifndef _XOPEN_NAME_MAX
+#define _XOPEN_NAME_MAX 255
+#endif
+#ifndef _XOPEN_PATH_MAX
+#define _XOPEN_PATH_MAX 1024
+#endif
+
+struct conf_entry {
 	int name;
 	char *str;
 };
 
-struct entry pathconf_tab[] = {
+struct limit_entry {
+	int value;
+	char *str;
+};
+
+struct conf_entry pathconf_tab[] = {
 	{_PC_FILESIZEBITS,		"FILESIZEBITS"},
 	{_PC_LINK_MAX,			"LINK_MAX"},
 	{_PC_MAX_CANON,			"MAX_CANON"},
@@ -25,10 +63,13 @@ struct entry pathconf_tab[] = {
 	{_PC_ASYNC_IO,			"_POSIX_ASYNC_IO"},
 	{_PC_PRIO_IO,			"_POSIX_PRIO_IO"},
 	{_PC_SYNC_IO,			"_POSIX_SYNC_IO"},
-	{_PC_TIMESTAMP_RESOLUTION,	"_POSIX_TIMESTAMP_RESOLUTION"}
+#ifdef _PC_TIMESTAMP_RESOLUTION
+	{_PC_TIMESTAMP_RESOLUTION,	"_POSIX_TIMESTAMP_RESOLUTION"},
+#endif
+	{}
 };
 
-struct entry sysconf_tab[] = {
+struct conf_entry sysconf_tab[] = {
 	{_SC_AIO_LISTIO_MAX,		"AIO_LISTIO_MAX"},
 	{_SC_AIO_MAX,			"AIO_MAX"},
 	{_SC_AIO_PRIO_DELTA_MAX,	"AIO_PRIO_DELTA_MAX"},
@@ -52,6 +93,13 @@ struct entry sysconf_tab[] = {
 	{_SC_OPEN_MAX,			"OPEN_MAX"},
 	{_SC_PAGE_SIZE,			"PAGE_SIZE"},
 	{_SC_PAGESIZE,			"PAGESIZE"},
+	{_SC_2_C_BIND,			"POSIX2_C_BIND"},
+	{_SC_2_C_DEV,			"POSIX2_C_DEV"},
+	{_SC_2_CHAR_TERM,		"POSIX2_CHAR_TERM"},
+	{_SC_2_LOCALEDEF,		"POSIX2_LOCALEDEF"},
+	{_SC_2_SW_DEV,			"POSIX2_SW_DEV"},
+	{_SC_2_UPE,			"POSIX2_UPE"},
+	{_SC_2_VERSION,			"POSIX2_VERSION"},
 	{_SC_THREAD_DESTRUCTOR_ITERATIONS,"PTHREAD_DESTRUCTOR_ITERATIONS"},
 	{_SC_THREAD_KEYS_MAX,		"PTHREAD_KEYS_MAX"},
 	{_SC_THREAD_STACK_MIN,		"PTHREAD_STACK_MIN"},
@@ -102,7 +150,7 @@ struct entry sysconf_tab[] = {
 	{_SC_THREAD_PRIORITY_SCHEDULING,"_POSIX_THREAD_PRIORITY_SCHEDULING"},
 	{_SC_THREAD_PROCESS_SHARED,	"_POSIX_THREAD_PROCESS_SHARED"},
 	{_SC_THREAD_ROBUST_PRIO_INHERIT,"_POSIX_THREAD_ROBUST_PRIO_INHERIT"},
-	[_SC_THREAD_ROBUST_PRIO_PROTECT,"_POSIX_THREAD_ROBUST_PRIO_PROTECT"},
+	{_SC_THREAD_ROBUST_PRIO_PROTECT,"_POSIX_THREAD_ROBUST_PRIO_PROTECT"},
 	{_SC_THREAD_SAFE_FUNCTIONS,	"_POSIX_THREAD_SAFE_FUNCTIONS"},
 	{_SC_THREAD_SPORADIC_SERVER,	"_POSIX_THREAD_SPORADIC_SERVER"},
 	{_SC_THREADS,			"_POSIX_THREADS"},
@@ -144,11 +192,273 @@ struct entry sysconf_tab[] = {
 	{_SC_XOPEN_SHM,			"_XOPEN_SHM"},
 	{_SC_XOPEN_STREAMS,		"_XOPEN_STREAMS"},
 	{_SC_XOPEN_UNIX,		"_XOPEN_UNIX"},
+#ifdef _SC_XOPEN_UUCP
 	{_SC_XOPEN_UUCP,		"_XOPEN_UUCP"},
-	{_SC_XOPEN_VERSION,		"_XOPEN_VERSION"}
-};
 #endif
-int main()
+	{_SC_XOPEN_VERSION,		"_XOPEN_VERSION"},
+	{}
+};
+
+struct conf_entry confstr_tab[] = {
+	{_CS_PATH,				"PATH"},
+	{_CS_POSIX_V7_ILP32_OFF32_CFLAGS,	"POSIX_V7_ILP32_OFF32_CFLAGS"},
+	{_CS_POSIX_V7_ILP32_OFF32_LDFLAGS,	"POSIX_V7_ILP32_OFF32_LDFLAGS"},
+	{_CS_POSIX_V7_ILP32_OFF32_LIBS,		"POSIX_V7_ILP32_OFF32_LIBS"},
+	{_CS_POSIX_V7_ILP32_OFFBIG_CFLAGS,	"POSIX_V7_ILP32_OFFBIG_CFLAGS"},
+	{_CS_POSIX_V7_ILP32_OFFBIG_LDFLAGS,	"POSIX_V7_ILP32_OFFBIG_LDFLAGS"},
+	{_CS_POSIX_V7_ILP32_OFFBIG_LIBS,	"POSIX_V7_ILP32_OFFBIG_LIBS"},
+	{_CS_POSIX_V7_LP64_OFF64_CFLAGS,	"POSIX_V7_LP64_OFF64_CFLAGS"},
+	{_CS_POSIX_V7_LP64_OFF64_LDFLAGS,	"POSIX_V7_LP64_OFF64_LDFLAGS"},
+	{_CS_POSIX_V7_LP64_OFF64_LIBS,		"POSIX_V7_LP64_OFF64_LIBS"},
+	{_CS_POSIX_V7_LPBIG_OFFBIG_CFLAGS,	"POSIX_V7_LPBIG_OFFBIG_CFLAGS"},
+	{_CS_POSIX_V7_LPBIG_OFFBIG_LDFLAGS,	"POSIX_V7_LPBIG_OFFBIG_LDFLAGS"},
+	{_CS_POSIX_V7_LPBIG_OFFBIG_LIBS,	"POSIX_V7_LPBIG_OFFBIG_LIBS"},
+#ifdef _CS_POSIX_V7_THREADS_CFLAGS
+	{_CS_POSIX_V7_THREADS_CFLAGS,		"POSIX_V7_THREADS_CFLAGS"},
+#endif
+#ifdef _CS_POSIX_V7_THREADS_LDFLAGS
+	{_CS_POSIX_V7_THREADS_LDFLAGS,		"POSIX_V7_THREADS_LDFLAGS"},
+#endif
+	{_CS_POSIX_V7_WIDTH_RESTRICTED_ENVS,	"POSIX_V7_WIDTH_RESTRICTED_ENVS"},
+	{_CS_V7_ENV,				"V7_ENV"},
+	{_CS_POSIX_V6_ILP32_OFF32_CFLAGS,	"POSIX_V6_ILP32_OFF32_CFLAGS"},
+	{_CS_POSIX_V6_ILP32_OFF32_LDFLAGS,	"POSIX_V6_ILP32_OFF32_LDFLAGS"},
+	{_CS_POSIX_V6_ILP32_OFF32_LIBS,		"POSIX_V6_ILP32_OFF32_LIBS"},
+	{_CS_POSIX_V6_ILP32_OFFBIG_CFLAGS,	"POSIX_V6_ILP32_OFFBIG_CFLAGS"},
+	{_CS_POSIX_V6_ILP32_OFFBIG_LDFLAGS,	"POSIX_V6_ILP32_OFFBIG_LDFLAGS"},
+	{_CS_POSIX_V6_ILP32_OFFBIG_LIBS,	"POSIX_V6_ILP32_OFFBIG_LIBS"},
+	{_CS_POSIX_V6_LP64_OFF64_CFLAGS,	"POSIX_V6_LP64_OFF64_CFLAGS"},
+	{_CS_POSIX_V6_LP64_OFF64_LDFLAGS,	"POSIX_V6_LP64_OFF64_LDFLAGS"},
+	{_CS_POSIX_V6_LP64_OFF64_LIBS,		"POSIX_V6_LP64_OFF64_LIBS"},
+	{_CS_POSIX_V6_LPBIG_OFFBIG_CFLAGS,	"POSIX_V6_LPBIG_OFFBIG_CFLAGS"},
+	{_CS_POSIX_V6_LPBIG_OFFBIG_LDFLAGS,	"POSIX_V6_LPBIG_OFFBIG_LDFLAGS"},
+	{_CS_POSIX_V6_LPBIG_OFFBIG_LIBS,	"POSIX_V6_LPBIG_OFFBIG_LIBS"},
+#ifdef _CS_POSIX_V6_THREADS_CFLAGS
+	{_CS_POSIX_V6_THREADS_CFLAGS,		"POSIX_V6_THREADS_CFLAGS"},
+#endif
+#ifdef _CS_POSIX_V6_THREADS_LDFLAGS
+	{_CS_POSIX_V6_THREADS_LDFLAGS,		"POSIX_V6_THREADS_LDFLAGS"},
+#endif
+	{_CS_POSIX_V6_WIDTH_RESTRICTED_ENVS,	"POSIX_V6_WIDTH_RESTRICTED_ENVS"},
+	{_CS_V6_ENV,				"V6_ENV"},
+	{}
+};
+
+struct limit_entry limits_tab[] = {
+	{_POSIX2_BC_BASE_MAX,			"POSIX2_BC_BASE_MAX"},
+	{_POSIX2_BC_DIM_MAX,			"POSIX2_BC_DIM_MAX"},
+	{_POSIX2_BC_SCALE_MAX,			"POSIX2_BC_SCALE_MAX"},
+	{_POSIX2_BC_STRING_MAX,			"POSIX2_BC_STRING_MAX"},
+	{_POSIX2_CHARCLASS_NAME_MAX,		"POSIX2_CHARCLASS_NAME_MAX"},
+	{_POSIX2_COLL_WEIGHTS_MAX,		"POSIX2_COLL_WEIGHTS_MAX"},
+	{_POSIX2_EXPR_NEST_MAX,			"POSIX2_EXPR_NEST_MAX"},
+	{_POSIX2_LINE_MAX,			"POSIX2_LINE_MAX"},
+	{_POSIX2_RE_DUP_MAX,			"POSIX2_RE_DUP_MAX"},
+	{_POSIX_CLOCKRES_MIN,			"_POSIX_CLOCKRES_MIN"},
+	{_POSIX_AIO_LISTIO_MAX,			"_POSIX_AIO_LISTIO_MAX"},
+	{_POSIX_AIO_MAX,			"_POSIX_AIO_MAX"},
+	{_POSIX_ARG_MAX,			"_POSIX_ARG_MAX"},
+	{_POSIX_CHILD_MAX,			"_POSIX_CHILD_MAX"},
+	{_POSIX_DELAYTIMER_MAX,			"_POSIX_DELAYTIMER_MAX"},
+	{_POSIX_HOST_NAME_MAX,			"_POSIX_HOST_NAME_MAX"},
+	{_POSIX_LINK_MAX,			"_POSIX_LINK_MAX"},
+	{_POSIX_LOGIN_NAME_MAX,			"_POSIX_LOGIN_NAME_MAX"},
+	{_POSIX_MAX_CANON,			"_POSIX_MAX_CANON"},
+	{_POSIX_MAX_INPUT,			"_POSIX_MAX_INPUT"},
+	{_POSIX_MQ_OPEN_MAX,			"_POSIX_MQ_OPEN_MAX"},
+	{_POSIX_MQ_PRIO_MAX,			"_POSIX_MQ_PRIO_MAX"},
+	{_POSIX_NAME_MAX,			"_POSIX_NAME_MAX"},
+	{_POSIX_NGROUPS_MAX,			"_POSIX_NGROUPS_MAX"},
+	{_POSIX_OPEN_MAX,			"_POSIX_OPEN_MAX"},
+	{_POSIX_PATH_MAX,			"_POSIX_PATH_MAX"},
+	{_POSIX_PIPE_BUF,			"_POSIX_PIPE_BUF"},
+	{_POSIX_RE_DUP_MAX,			"_POSIX_RE_DUP_MAX"},
+	{_POSIX_RTSIG_MAX,			"_POSIX_RTSIG_MAX"},
+	{_POSIX_SEM_NSEMS_MAX,			"_POSIX_SEM_NSEMS_MAX"},
+	{_POSIX_SEM_VALUE_MAX,			"_POSIX_SEM_VALUE_MAX"},
+	{_POSIX_SIGQUEUE_MAX,			"_POSIX_SIGQUEUE_MAX"},
+	{_POSIX_SSIZE_MAX,			"_POSIX_SSIZE_MAX"},
+	{_POSIX_SS_REPL_MAX,			"_POSIX_SS_REPL_MAX"},
+	{_POSIX_STREAM_MAX,			"_POSIX_STREAM_MAX"},
+	{_POSIX_SYMLINK_MAX,			"_POSIX_SYMLINK_MAX"},
+	{_POSIX_SYMLOOP_MAX,			"_POSIX_SYMLOOP_MAX"},
+	{_POSIX_THREAD_DESTRUCTOR_ITERATIONS,	"_POSIX_THREAD_DESTRUCTOR_ITERATIONS"},
+	{_POSIX_THREAD_KEYS_MAX,		"_POSIX_THREAD_KEYS_MAX"},
+	{_POSIX_THREAD_THREADS_MAX,		"_POSIX_THREAD_THREADS_MAX"},
+	{_POSIX_TIMER_MAX,			"_POSIX_TIMER_MAX"},
+	{_POSIX_TRACE_EVENT_NAME_MAX,		"_POSIX_TRACE_EVENT_NAME_MAX"},
+	{_POSIX_TRACE_NAME_MAX,			"_POSIX_TRACE_NAME_MAX"},
+	{_POSIX_TRACE_SYS_MAX,			"_POSIX_TRACE_SYS_MAX"},
+	{_POSIX_TRACE_USER_EVENT_MAX,		"_POSIX_TRACE_USER_EVENT_MAX"},
+	{_POSIX_TTY_NAME_MAX,			"_POSIX_TTY_NAME_MAX"},
+	{_POSIX_TZNAME_MAX,			"_POSIX_TZNAME_MAX"},
+	{_POSIX2_BC_BASE_MAX,			"_POSIX2_BC_BASE_MAX"},
+	{_POSIX2_BC_DIM_MAX,			"_POSIX2_BC_DIM_MAX"},
+	{_POSIX2_BC_SCALE_MAX,			"_POSIX2_BC_SCALE_MAX"},
+	{_POSIX2_BC_STRING_MAX,			"_POSIX2_BC_STRING_MAX"},
+	{_POSIX2_CHARCLASS_NAME_MAX,		"_POSIX2_CHARCLASS_NAME_MAX"},
+	{_POSIX2_COLL_WEIGHTS_MAX,		"_POSIX2_COLL_WEIGHTS_MAX"},
+	{_POSIX2_EXPR_NEST_MAX,			"_POSIX2_EXPR_NEST_MAX"},
+	{_POSIX2_LINE_MAX,			"_POSIX2_LINE_MAX"},
+	{_POSIX2_RE_DUP_MAX,			"_POSIX2_RE_DUP_MAX"},
+	{_XOPEN_IOV_MAX,			"_XOPEN_IOV_MAX"},
+	{_XOPEN_NAME_MAX,			"_XOPEN_NAME_MAX"},
+	{_XOPEN_PATH_MAX,			"_XOPEN_PATH_MAX"},
+	{}
+};
+
+char *undef_tab[] = {
+#ifndef _PC_TIMESTAMP_RESOLUTION
+	"_POSIX_TIMESTAMP_RESOLUTION",
+#endif
+#ifndef _SC_XOPEN_UUCP
+	"_XOPEN_UUCP",
+#endif
+#ifndef _CS_POSIX_V7_THREADS_CFLAGS
+	"_POSIX_V7_THREADS_CFLAGS",
+#endif
+#ifndef _CS_POSIX_V7_THREADS_LDFLAGS
+	"_POSIX_V7_THREADS_LDFLAGS",
+#endif
+#ifndef _CS_POSIX_V6_THREADS_CFLAGS
+	"_POSIX_V6_THREADS_CFLAGS",
+#endif
+#ifndef _CS_POSIX_V7_THREADS_CFLAGS
+	"_POSIX_V6_THREADS_LDFLAGS",
+#endif
+	""
+};
+
+static char *argv0;
+
+static void printf_die(char *fmt, ...)
 {
+	va_list args;
+
+	va_start(args, fmt);
+	vprintf(fmt, args);
+	va_end(args);
+	if(ferror(stdout)) {
+		perror(argv0);
+		exit(1);
+	}
+}
+
+static void write_limit(long limit)
+{
+	if(limit == -1 && errno == EINVAL) {
+		perror(argv0);
+		exit(1);
+	}
+	if(limit == -1)
+		printf_die("undefined\n");
+	else
+		printf_die("%ld\n", limit);
+}
+
+int main(int argc, char **argv)
+{
+	int c;
+	char *version_spec = 0;
+
+	int n;
+	char **v;
+
+	setlocale(LC_CTYPE, "");
+	setlocale(LC_MESSAGES, "");
+
+	argv0 = argv[0];
+
+	while((c = getopt(argc, argv, "v:")) != -1) {
+		if(c != 'v') return 1;
+		version_spec = optarg;
+	}
+
+	n = argc - optind;
+	v = argv + optind;
+
+	if(n < 1) {
+		fprintf(stderr, "Too few arguments.\n");
+		return 1;
+	}
+	if (n > 2) {
+		fprintf(stderr, "Too many arguments.\n");
+		return 1;
+	}
+
+	if(version_spec) {
+		int valid = 0;
+		if(strcmp(version_spec, "POSIX_V7_ILP32_OFF32") == 0)
+			valid = sizeof(int) == 4 && sizeof(long) == 4 && sizeof(void*) == 4 && sizeof(off_t) == 4;
+		else if(strcmp(version_spec, "POSIX_V7_ILP32_OFFBIG") == 0)
+			valid = sizeof(int) == 4 && sizeof(long) == 4 && sizeof(void*) == 4 && sizeof(off_t) >= 8;
+		else if(strcmp(version_spec, "POSIX_V7_LP64_OFF64") == 0)
+			valid = sizeof(int) == 4 && sizeof(long) == 8 && sizeof(void*) == 8 && sizeof(off_t) == 8;
+		else if(strcmp(version_spec, "POSIX_V7_LPBIG_OFFBIG") == 0)
+			valid = sizeof(int) >= 4 && sizeof(long) >= 8 && sizeof(void*) >= 8 && sizeof(off_t) >= 8;
+
+		if(!valid) {
+			fprintf(stderr, "%s: Could not retrieve configuration.\n", argv[0]);
+			return 1;
+		}
+	}
+
+	if(n == 2) {
+		for(struct conf_entry *entry = pathconf_tab; entry->str; entry++) {
+			if(strcmp(entry->str, v[0]) == 0) {
+				errno = 0;
+				write_limit(pathconf(v[1], entry->name));
+				return 0;
+			}
+		}
+	}
+
+	for(struct conf_entry *entry = sysconf_tab; entry->str; entry++) {
+		if(strcmp(entry->str, v[0]) == 0) {
+			errno = 0;
+			write_limit(sysconf(entry->name));
+			return 0;
+		}
+	}
+
+	for(struct conf_entry *entry = confstr_tab; entry->str; entry++) {
+		if(strcmp(entry->str, v[0]) == 0) {
+			errno = 0;
+			size_t len = confstr(entry->name, 0, 0);
+			if(len == 0 && errno == EINVAL) {
+				perror(argv[0]);
+				return 1;
+			}
+			if(len == 0) {
+				printf_die("undefined\n");
+			} else {
+				char *buf = malloc(len);
+				if(!buf) {
+					perror(argv[0]);
+					return 1;
+				}
+				confstr(entry->name, buf, len);
+				printf_die("%s\n", buf);
+			}
+			return 0;
+		}
+	}
+
+	for(struct limit_entry *entry = limits_tab; entry->str; entry++) {
+		if(strcmp(entry->str, v[0]) == 0) {
+			printf_die("%d\n", entry->value);
+			return 0;
+		}
+	}
+
+	for(char **entry = undef_tab; *entry; entry++) {
+		if(strcmp(*entry, v[0]) == 0) {
+			printf_die("undefined\n");
+			return 0;
+		}
+	}
+
+	errno = EINVAL;
+	perror(argv[0]);
 	return 1;
 }
