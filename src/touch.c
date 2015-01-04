@@ -155,6 +155,7 @@ int main(int argc, char **argv)
 				perror(argv[0]);
 				return 1;
 			}
+			close(fd);
 		} else if(errno == EACCES) {
 			if(utimensat(AT_FDCWD, *v, timespec, 0) == -1) {
 				perror(argv[0]);
