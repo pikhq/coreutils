@@ -7,6 +7,9 @@
 #include <limits.h>
 #include <locale.h>
 
+#include "asprintf.h"
+#include "noreturn.h"
+
 enum {
 	INTEGER,
 	STRING
@@ -32,7 +35,7 @@ static struct val parse_addsub();
 static struct val parse_muldiv();
 static struct val parse_match();
 
-static void die(char *msg, ...)
+static void noreturn die(char *msg, ...)
 {
 	va_list ap;
 	va_start(ap, msg);
@@ -109,11 +112,10 @@ static void val_to_string(struct val *val)
 	val->type = STRING;
 	if(val->str_val) return;
 
-	len = snprintf(0, 0, "%d", val->int_val);
-	buf = malloc(len);
-	if(!buf) die(0);
-	snprintf(buf, len, "%d", val->int_val);
+	len = asprintf(&buf, "%d", val->int_val);
+	if(len < 0) die(0);
 	val->int_val = -1;
+	val->alloced = 1;
 }
 
 static struct val parse_expr()
@@ -411,10 +413,15 @@ int main(int argc, char **argv)
 
 	res = parse();
 
+	val_to_maybe_int(&res);
+
 	if(res.type == INTEGER)
 		printf("%d\n", res.int_val);
 	else
 		printf("%s\n", res.str_val);
 
-	return (res.type == INTEGER && res.int_val != 0) || (res.type == STRING && strcmp(res.str_val, "") != 0);
+	if(res.type == INTEGER)
+		return res.int_val != 0;
+	else
+		return strcmp(res.str_val, "") != 0;
 }
