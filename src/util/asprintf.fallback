@@ -2,7 +2,9 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-int repl_asprintf(char **s, const char *fmt, ...)
+#include "asprintf.h"
+
+int asprintf(char **s, const char *fmt, ...)
 {
 	int l, ret;
 	va_list ap, ap2;

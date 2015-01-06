@@ -2,6 +2,8 @@
 #define _ALL_SOURCE
 #include <stdio.h>
 
+#undef asprintf
+
 int main()
 {
 	int (*p)(char **,const char*,...) = asprintf;
