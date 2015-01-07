@@ -7,15 +7,6 @@
 
 extern char **environ;
 
-static void my_perror(char *prog)
-{
-        char *err = strerror(errno);
-        write(2, prog, strlen(prog));
-        write(2, ": ", 2);
-        write(2, err, strlen(err));
-        write(2, "\n", 1);
-}
-
 int main(int argc, char **argv)
 {
 	int i;
@@ -27,29 +18,28 @@ int main(int argc, char **argv)
 			environ = (char*[]){0};
 		}
 		if(argv[i][1] != 'i' || argv[i][2]) {
-			errno = EINVAL;
-			my_perror(argv[0]);
+			write_err(argv[0], EINVAL, argv[i]);
 			return 1;
 		}
 	}
 
 	for(; i < argc && strchr(argv[i], '='); i++) {
 		if(putenv(argv[i]) < 0) {
-			my_perror(argv[0]);
+			write_err(argv[0], errno, 0);
 			return 1;
 		}
 	}
 
 	if(i < argc) {
 		execvp(argv[i], &argv[i]);
-		my_perror(argv[0]);
+		write_err(argv[0], errno, 0);
 		return errno != ENOENT ? 126 : 127;
 	}
 	for(n = 0; environ && environ[n]; n++) {
 		if(write_fd(1, environ[n], strlen(environ[n]))
 		      < strlen(environ[n])
 		   || write_fd(1, "\n", 1) < 1) {
-			my_perror(argv[0]);
+			write_err(argv[0], errno, 0);
 			return 1;
 		}
 	}

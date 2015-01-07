@@ -13,10 +13,6 @@ int main(int argc, char **argv)
 	setlocale(LC_MESSAGES, "");
 
 	execvp(args[0], args);
-	err = strerror(errno);
-	write(2, argv[0], strlen(argv[0]));
-	write(2, ": ", 2);
-	write(2, err, strlen(err));
-	write(2, "\n", 1);
+	write_err(argv[0], errno, 0);
 	return errno != ENOENT ? 126 : 127;
 }

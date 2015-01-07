@@ -8,6 +8,8 @@
 #include <fcntl.h>
 #include <getopt.h>
 
+#include "util.h"
+
 static uint32_t sysv_sum(size_t len, unsigned char *c, uint32_t sum)
 {
 	for(; len; len--, c++) {
@@ -24,11 +26,6 @@ static uint32_t bsd_sum(size_t len, unsigned char *c, uint32_t sum)
 		tmp += *c;
 	}
 	return tmp;
-}
-
-static void my_perror(char *argv0)
-{
-	dprintf(2, "%s: %s\n", argv0, strerror(errno));
 }
 
 static int cksum(int f, char *name, int sysv)
@@ -82,9 +79,7 @@ int main(int argc, char **argv)
 		case 's':
 			sysv = 1;
 			break;
-		case '?':
-			errno = EINVAL;
-			my_perror(argv[0]);
+		default:
 			return 1;
 		}
 	}
@@ -94,19 +89,19 @@ int main(int argc, char **argv)
 	out_names = (n > 1) || (n && sysv);
 
 	if(!n) {
-		if(cksum(0, 0, sysv) < 0) { my_perror(argv[0]); ret = 1; }
+		if(cksum(0, 0, sysv) < 0) { write_err(argv[0], errno, 0); ret = 1; }
 	}
 
 	for(; n; v++, n--) {
 		int f = v[0][0] != '-' || v[0][1]
 		      ? open(*v, O_RDONLY)
 		      : 0;
-		if(f < 0) { my_perror(argv[0]); ret = 1; continue; }
-		if(cksum(f, out_names ? *v : 0, sysv) < 0) { my_perror(argv[0]); ret = 1; }
-		if(f != 0 && close(f) < 0) { my_perror(argv[0]); ret = 1; }
+		if(f < 0) { write_err(argv[0], errno, 0); ret = 1; continue; }
+		if(cksum(f, out_names ? *v : 0, sysv) < 0) { write_err(argv[0], errno, 0); ret = 1; }
+		if(f != 0 && close(f) < 0) { write_err(argv[0], errno, 0); ret = 1; }
 	}
 
-	if(close(1) < 0) { my_perror(argv[0]); ret = 1; }
+	if(close(1) < 0) { write_err(argv[0], errno, 0); ret = 1; }
 
 	return ret;
 }

@@ -5,6 +5,8 @@
 #include <errno.h>
 #include <stdlib.h>
 
+#include "util.h"
+
 int main(int argc, char **argv)
 {
 	int c = argc-1;
@@ -35,10 +37,6 @@ int main(int argc, char **argv)
 	return 0;
 
 err:
-	errstring = strerror(errno);
-	write(2, argv[0], strlen(argv[0]));
-	write(2, ": ", 2);
-	write(2, errstring, strlen(errstring));
-	write(2, "\n", 1);
+	write_err(argv[0], errno, 0);
 	return 1;
 }

@@ -4,6 +4,8 @@
 #include <string.h>
 #include <locale.h>
 
+#include "util.h"
+
 static uint32_t update_crc(size_t len, unsigned char *c, uint32_t sum)
 {
 	static const uint32_t crctab[] = {
@@ -66,11 +68,6 @@ static uint32_t update_crc(size_t len, unsigned char *c, uint32_t sum)
 	return sum;
 }
 
-static void format_err(char *argv0, char *name)
-{
-	fprintf(stderr, "%s: %s: %s\n", argv0, name, strerror(errno));
-}
-
 static void cksum(FILE *f, char *name)
 {
 	off_t len = 0;
@@ -105,7 +102,7 @@ int main(int argc, char **argv)
 	if(!n) {
 		freopen(0, "rb", stdin);
 		cksum(stdin, 0);
-		if(ferror(stdin)) { format_err(argv[0], "-"); ret = 1; }
+		if(ferror(stdin)) { write_err(argv[0], errno, "-"); ret = 1; }
 		goto end;
 	}
 	if(strcmp(*v, "--") == 0) { n--; v++; }
@@ -114,14 +111,14 @@ int main(int argc, char **argv)
 		FILE *f = strcmp(*v, "-") != 0
 			? fopen(*v, "rb")
 			: freopen(0, "rb", stdin);
-		if(!f) { format_err(argv[0], *v); ret = 1; continue; }
+		if(!f) { write_err(argv[0], errno, *v); ret = 1; continue; }
 		cksum(f, *v);
-		if(ferror(f)) { format_err(argv[0], *v); ret = 1; }
+		if(ferror(f)) { write_err(argv[0], errno, *v); ret = 1; }
 		if(f != stdin) fclose(f);
 	}
 end:
 	fflush(stdout);
-	if(ferror(stdout)) { format_err(argv[0], "[stdout]"); ret = 1; }
+	if(ferror(stdout)) { write_err(argv[0], errno, "write error"); ret = 1; }
 	fclose(stdout);
 
 	return ret;

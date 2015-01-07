@@ -6,14 +6,11 @@
 #include <limits.h>
 
 #include "util.h"
+#include "noreturn.h"
 
-static void die(char *prog)
+static void noreturn die(char *prog)
 {
-	char *err = strerror(errno);
-	write(2, prog, strlen(prog));
-	write(2, ": ", 2);
-	write(2, err, strlen(err));
-	write(2, "\n", 1);
+	write_err(prog, errno, 0);
 	exit(1);
 }
 

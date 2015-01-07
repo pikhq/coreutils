@@ -8,17 +8,6 @@
 
 #include "util.h"
 
-static void my_perror(char *prog, char *msg)
-{
-	char *err = strerror(errno);
-	write(2, prog, strlen(prog));
-	write(2, ": ", 2);
-	write(2, msg, strlen(msg));
-	write(2, ": ", 2);
-	write(2, err, strlen(err));
-	write(2, "\n", 1);
-}
-
 int main(int argc, char **argv)
 {
 	char buf[4 * 1024];
@@ -53,7 +42,7 @@ int main(int argc, char **argv)
 	for(i = 0; i < n; i++) {
 		fds[i] = open(v[i], mode, 00666);
 		if(fds[i] < 0) {
-			my_perror(argv[0], v[i]);
+			write_err(argv[0], errno, v[i]);
 			ret = 1;
 		}
 	}
@@ -64,19 +53,19 @@ int main(int argc, char **argv)
 			if(fds[i] < 0) continue;
 			if(write_fd(fds[i], buf, len) < len) {
 				fds[i] = -1;
-				my_perror(argv[0], "write error");
+				write_err(argv[0], errno, "write error");
 				ret = 1;
 			}
 		}
 	}
 	if(len) {
-		my_perror(argv[0], "read error");
+		write_err(argv[0], errno, "read error");
 		ret = 1;
 	}
 	for(i = 0; i < n + 1; i++) {
 		if(fds[i] < 0) continue;
 		if(close(fds[i]) < 0) {
-			my_perror(argv[0], "error closing file");
+			write_err(argv[0], errno, "error closing file");
 			ret = 1;
 		}
 	}

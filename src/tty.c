@@ -5,30 +5,6 @@
 
 #include "util.h"
 
-static int my_write(int fd, char *s, size_t l)
-{
-	while(l) {
-		ssize_t n;
-		errno = 0;
-		n = write(fd, s, l);
-		if(n < 0 && errno == EINTR) continue;
-		if(n < 0) return -1;
-		s += n;
-		l -= n;
-	}
-	return 0;
-}
-
-static void errorout(char *prog)
-{
-	char *err = strerror(errno);
-	my_write(2, prog, strlen(prog));
-	my_write(2, ": ", 2);
-	my_write(2, err, strlen(err));
-	my_write(2, "\n", 1);
-	exit(2);
-}
-
 int main(int argc, char **argv)
 {
 	int ret = 0;
@@ -40,9 +16,9 @@ int main(int argc, char **argv)
 		tty = "not a tty";
 	}
 
-	if(!tty) errorout(argv[0]);
+	if(!tty) { write_err(argv[0], errno, 0); return 2; }
 
-	if(write_fd(1, tty, strlen(tty)) < strlen(tty)) errorout(argv[0]);
-	if(write_fd(1, "\n", 1) < 1) errorout(argv[0]);
+	if(write_fd(1, tty, strlen(tty)) < strlen(tty)) { write_err(argv[0], errno, 0); return 2; }
+	if(write_fd(1, "\n", 1) < 1) { write_err(argv[0], errno, 0); return 2; }
 	return ret;
 }

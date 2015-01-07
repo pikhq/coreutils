@@ -6,15 +6,6 @@
 
 #include "util.h"
 
-static void my_perror(char *prog)
-{
-        char *err = strerror(errno);
-        write(2, prog, strlen(prog));
-        write(2, ": ", 2);
-        write(2, err, strlen(err));
-        write(2, "\n", 1);
-}
-
 int main(int argc, char **argv)
 {
 	int n = argc - 1;
@@ -28,8 +19,7 @@ int main(int argc, char **argv)
 	if(n && strcmp(v[0], "--") == 0) { n--; v++; }
 
 	if(!n) {
-		write(2, argv[0], strlen(argv[0]));
-		write(2, ": Missing operand\n", sizeof(": Missing operand\n")-1);
+		write_err(argv[0], 0, "Missing operand");
 		return 1;
 	}
 
@@ -37,7 +27,7 @@ int main(int argc, char **argv)
 
 	if(write_fd(1, str, strlen(str)) < strlen(str)
 	   || write_fd(1, "\n", 1) < 1) {
-		my_perror(argv[0]);
+		write_err(argv[0], errno, 0);
 		return 1;
 	}
 }

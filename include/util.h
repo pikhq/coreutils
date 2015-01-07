@@ -7,5 +7,6 @@ struct tm;
 
 size_t write_fd(int fd, const char *s, size_t len);
 int parse_posixdate(char*, struct tm*);
+void write_err(const char*, int, const char*);
 
 #endif

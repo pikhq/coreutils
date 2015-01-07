@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -91,20 +90,6 @@ error:
 	return -1;
 }
 
-static void write_msg(char *prog, char *msg)
-{
-	write_fd(2, prog, strlen(prog));
-	write_fd(2, ": ", 2);
-	write_fd(2, msg, strlen(msg));
-	write_fd(2, "\n", 1);
-}
-
-static void write_errno(char *prog)
-{
-	char *err = strerror(errno);
-	write_msg(prog, err);
-}
-
 int main(int argc, char **argv)
 {
 	int n = argc - 1;
@@ -121,15 +106,12 @@ int main(int argc, char **argv)
 		}
 		if(v[0][1] == 'u' && !v[0][2]) {
 			if(setenv("TZ", "UTC0", 1)) {
-				write_errno(argv[0]);
+				write_err(argv[0], errno, 0);
 				return 1;
 			}
 			continue;
 		}
-		errno = EINVAL;
-		write_fd(2, argv[0], strlen(argv[0]));
-		write_fd(2, ": ", 2);
-		write_errno(v[0]);
+		write_err(argv[0], EINVAL, v[0]);
 		return 1;
 	}
 
@@ -163,7 +145,7 @@ int main(int argc, char **argv)
 	}
 
 	if(n > 1) {
-		write_msg(argv[0], "Too many operands");
+		write_err(argv[0], 0, "Too many operands");
 		return 1;
 	}
 
@@ -174,20 +156,20 @@ int main(int argc, char **argv)
 		char *buf;
 
 		if(!localtime_r(&(time_t){time(0)}, &tm)) {
-			write_errno(argv[0]);
+			write_err(argv[0], errno, 0);
 			return 1;
 		}
 
 		len = astrftime(&buf, v[0] + 1, &tm);
 		if(len < 0) {
-			write_errno(argv[0]);
+			write_err(argv[0], errno, 0);
 			return 1;
 		}
 
 		if(write_fd(1, buf, len) < len
 		  || write_fd(1, "\n", 1) < 1
 		  || close(1) == -1) {
-			write_errno(argv[0]);
+			write_err(argv[0], errno, 0);
 			return 1;
 		}
 	} else {
@@ -196,18 +178,18 @@ int main(int argc, char **argv)
 		if(parse_posixdate(v[0], &tm)) {
 			if(!errno)
 				errno = EINVAL;
-			write_errno(argv[0]);
+			write_err(argv[0], errno, 0);
 			return 1;
 		}
 
 		time_t conv_time = mktime(&tm);
 		if(conv_time == -1) {
-			write_errno(argv[0]);
+			write_err(argv[0], errno, 0);
 			return 1;
 		}
 
 		if(clock_settime(CLOCK_REALTIME, &(struct timespec){ conv_time, 0 }) == -1) {
-			write_errno(argv[0]);
+			write_err(argv[0], errno, 0);
 			return 1;
 		}
 	}

@@ -6,21 +6,12 @@
 
 #include "util.h"
 
-static void my_perror(char *prog)
-{
-	char *err = strerror(errno);
-	write(2, prog, strlen(prog));
-	write(2, ": ", 2);
-	write(2, err, strlen(err));
-	write(2, "\n", 1);
-}
-
 static void uname_entry(char *prog, int *any_wrote, char *entry)
 {
 	if(*any_wrote)
-		if(write_fd(1, " ", 1) < 1) { my_perror(prog); exit(1); }
+		if(write_fd(1, " ", 1) < 1) { write_err(prog, errno, 0); exit(1); }
 	*any_wrote = 1;
-	if(write_fd(1, entry, strlen(entry)) < strlen(entry)) { my_perror(prog); exit(1); }
+	if(write_fd(1, entry, strlen(entry)) < strlen(entry)) { write_err(prog, errno, 0); exit(1); }
 }
 
 int main(int argc, char **argv)
@@ -49,7 +40,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if(uname(&name) < 0) { my_perror(argv[0]); return 1; }
+	if(uname(&name) < 0) { write_err(argv[0], errno, 0); return 1; }
 	if(!any_opts) opt_s = 1;
 
 	if(opt_s || opt_a)
@@ -62,5 +53,5 @@ int main(int argc, char **argv)
 		uname_entry(argv[0], &any_wrote, name.version);
 	if(opt_m || opt_a)
 		uname_entry(argv[0], &any_wrote, name.machine);
-	if(write_fd(1, "\n", 1) < 1) { my_perror(argv[0]); return 1; }
+	if(write_fd(1, "\n", 1) < 1) { write_err(argv[0], errno, 0); return 1; }
 }

@@ -49,20 +49,19 @@ int main(int argc, char **argv)
 		do {
 			wd = getcwd(buf, alloc);
 			if(!wd && errno != ERANGE) {
-				perror(argv[0]);
+				write_err(argv[0], errno, 0);
 				return 1;
 			}
 			if(!wd) {
 				if(alloc == SIZE_MAX) {
-					errno = ENOMEM;
-					perror(argv[0]);
+					write_err(argv[0], ENOMEM, 0);
 					return 1;
 				}
 				if(alloc + alloc/2 < alloc) {
 					alloc = SIZE_MAX;
 				}
 				buf = realloc(buf, alloc);
-				if(!buf) { perror(argv[0]); return 1; }
+				if(!buf) { write_err(argv[0], errno, 0); return 1; }
 			}
 		} while(!wd);
 	}
@@ -70,7 +69,7 @@ int main(int argc, char **argv)
 	if(write_fd(1, wd, strlen(wd)) < strlen(wd)
 	   || write_fd(1, "\n", 1) < 1
 	   || close(1)) {
-		perror(argv[0]);
+		write_err(argv[0], errno, 0);
 		return 1;
 	}
 }
