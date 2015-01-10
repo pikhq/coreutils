@@ -28,14 +28,14 @@ src/%: src/%.o src/util.a
 	$(CC) $(LDFLAGS) -o $@ $< src/util.a $(LDLIBS)
 
 include/noreturn.h: include/noreturn.inc
-	-$(CC) $(CFLAGS) $(CPPFLAGS) tests/stdnoreturn.test.c -o tests/stdnoreturn.test.o
-	if [ -e tests/stdnoreturn.test.o ];then echo "#include <stdnoreturn.h>">include/noreturn.h;fi
-	if [ ! -e tests/stdnoreturn.test.o ];then cp include/noreturn.inc include/noreturn.h;fi
+	-$(CC) $(CFLAGS) $(CPPFLAGS) -o /dev/null tests/stdnoreturn.test.c \
+		&& echo "#include <stdnoreturn.h>">include/noreturn.h \
+		|| cp include/noreturn.inc include/noreturn.h
 
 src/util/asprintf.c: src/util/asprintf.inc src/util/asprintf.fallback
-	-$(CC) $(CFLAGS) $(CPPFLAGS) -o tests/asprintf.test tests/asprintf.test.c $(LDLIBS)
-	if [ -e tests/asprintf.test ];then cp src/util/asprintf.inc src/util/asprintf.c;fi
-	if [ ! -e tests/asprintf.test ];then cp src/util/asprintf.fallback src/util/asprintf.c;fi
+	-$(CC) $(CFLAGS) $(CPPFLAGS) -o /dev/null tests/asprintf.test.c $(LDLIBS) \
+		&& cp src/util/asprintf.inc src/util/asprintf.c \
+		|| cp src/util/asprintf.fallback src/util/asprintf.c
 
 clean:
 	-rm -f $(PROGS)
