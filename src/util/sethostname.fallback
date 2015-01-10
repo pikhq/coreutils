@@ -1,0 +1,8 @@
+#include <errno.h>
+#include "sethostname.h"
+
+int sethostname(const char *name, size_t len)
+{
+	errno = ENOSYS;
+	return -1;
+}

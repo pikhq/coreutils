@@ -37,6 +37,10 @@ src/util/getopt_long.c: src/util/getopt_long.inc src/util/getopt_long.fallback
 		&& cp src/util/getopt_long.inc src/util/getopt_long.c \
 		|| cp src/util/getopt_long.fallback src/util/getopt_long.c
 
+src/util/sethostname.c: src/util/sethostname.inc src/util/sethostname.fallback
+	-$(CC) $(CFLAGS) $(CPPFLAGS) -o /dev/null tests/sethostname.test.c $(LDLIBS) \
+		&& cp src/util/sethostname.inc src/util/sethostname.c \
+		|| cp src/util/sethostname.fallback src/util/sethostname.c
 
 src/util/asprintf.c: src/util/asprintf.inc src/util/asprintf.fallback
 	-$(CC) $(CFLAGS) $(CPPFLAGS) -o /dev/null tests/asprintf.test.c $(LDLIBS) \

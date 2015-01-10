@@ -1,4 +1,3 @@
-#define _GNU_SOURCE
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
@@ -7,6 +6,7 @@
 
 #include "util.h"
 #include "noreturn.h"
+#include "sethostname.h"
 
 static void noreturn die(char *prog)
 {
