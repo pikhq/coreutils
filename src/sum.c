@@ -6,8 +6,8 @@
 #include <string.h>
 #include <locale.h>
 #include <fcntl.h>
-#include <getopt.h>
 
+#include "getopt_long.h"
 #include "util.h"
 
 static uint32_t sysv_sum(size_t len, unsigned char *c, uint32_t sum)

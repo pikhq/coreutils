@@ -32,6 +32,12 @@ include/noreturn.h: include/noreturn.inc
 		&& echo "#include <stdnoreturn.h>">include/noreturn.h \
 		|| cp include/noreturn.inc include/noreturn.h
 
+src/util/getopt_long.c: src/util/getopt_long.inc src/util/getopt_long.fallback
+	-$(CC) $(CFLAGS) $(CPPFLAGS) -o /dev/null tests/getopt_long.test.c $(LDLIBS) \
+		&& cp src/util/getopt_long.inc src/util/getopt_long.c \
+		|| cp src/util/getopt_long.fallback src/util/getopt_long.c
+
+
 src/util/asprintf.c: src/util/asprintf.inc src/util/asprintf.fallback
 	-$(CC) $(CFLAGS) $(CPPFLAGS) -o /dev/null tests/asprintf.test.c $(LDLIBS) \
 		&& cp src/util/asprintf.inc src/util/asprintf.c \
