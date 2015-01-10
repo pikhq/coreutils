@@ -37,7 +37,11 @@ int main(int argc, char **argv)
 	n = argc - optind;
 	v = argv + optind;
 
-	int fds[n+1];
+	int *fds = calloc(n+1, sizeof(*fds));
+	if(!fds) {
+		write_err(argv[0], errno, 0);
+		return 1;
+	}
 
 	for(i = 0; i < n; i++) {
 		fds[i] = open(v[i], mode, 00666);
