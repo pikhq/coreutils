@@ -1,12 +1,11 @@
-#define _GNU_SOURCE
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <ctype.h>
 #include <errno.h>
-#include <sys/klog.h>
 #include <limits.h>
 
+#include "klogctl.h"
 #include "util.h"
 
 int main(int argc, char **argv)

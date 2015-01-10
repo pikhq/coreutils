@@ -1,0 +1,8 @@
+#include <errno.h>
+#include "klogctl.h"
+
+int klogctl(int type, char *buf, int len)
+{
+	errno = ENOSYS;
+	return -1;
+}

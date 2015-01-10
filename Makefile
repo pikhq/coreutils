@@ -37,6 +37,11 @@ src/util/getopt_long.c: src/util/getopt_long.inc src/util/getopt_long.fallback
 		&& cp src/util/getopt_long.inc src/util/getopt_long.c \
 		|| cp src/util/getopt_long.fallback src/util/getopt_long.c
 
+src/util/klogctl.c: src/util/klogctl.inc src/util/klogctl.fallback
+	-$(CC) $(CFLAGS) $(CPPFLAGS) -o /dev/null tests/klogctl.test.c $(LDLIBS) \
+		&& cp src/util/klogctl.inc src/util/klogctl.c \
+		|| cp src/util/klogctl.fallback src/util/klogctl.c
+
 src/util/sethostname.c: src/util/sethostname.inc src/util/sethostname.fallback
 	-$(CC) $(CFLAGS) $(CPPFLAGS) -o /dev/null tests/sethostname.test.c $(LDLIBS) \
 		&& cp src/util/sethostname.inc src/util/sethostname.c \
