@@ -2,6 +2,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <stdint.h>
+#include <locale.h>
 
 #include "util.h"
 
@@ -21,6 +22,9 @@ int main(int argc, char **argv)
 		ALL_DIFF,
 		SILENT
 	} mode = FIRST_DIFF;
+
+	setlocale(LC_CTYPE, "");
+	setlocale(LC_MESSAGES, "");
 
 	while((c = getopt(argc, argv, "ls")) != -1) {
 		switch(c) {
