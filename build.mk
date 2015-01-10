@@ -1,7 +1,7 @@
 CC?=c99
 CFLAGS?=-O2
 ifeq ($(findstring gcc,$(CC)), gcc)
-	CC+=-std=c99
+	override CC+=-std=c99
 endif
 ifeq (cc,$(CC))
 	override CC=c99
