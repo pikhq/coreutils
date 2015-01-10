@@ -4,6 +4,8 @@
 #include <string.h>
 #include <locale.h>
 
+#include "util.h"
+
 int main(int argc, char **argv)
 {
 	char *err;
