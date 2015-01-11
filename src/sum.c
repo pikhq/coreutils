@@ -53,9 +53,10 @@ static int cksum(int f, char *name, int sysv)
 	return dprintf(1, sysv ? sysv_fmt : bsd_fmt, sum, (intmax_t)len / bs + !!(len % bs), name ? " " : "", name ? name : "");
 }
 
-static const struct option longopts = 
-	{"sysv", no_argument, 0, 's' }
-;
+static const struct option longopts[] =  {
+	{"sysv", no_argument, 0, 's' },
+	{}
+};
 
 int main(int argc, char **argv)
 {
@@ -70,7 +71,7 @@ int main(int argc, char **argv)
 	setlocale(LC_CTYPE, "");
 	setlocale(LC_MESSAGES, "");
 
-	while((optc = getopt_long(argc, argv, "+rs", &longopts, 0)) != -1) {
+	while((optc = getopt_long(argc, argv, "+rs", longopts, 0)) != -1) {
 		switch(optc) {
 		case 'r':
 			sysv = 0;
