@@ -14,7 +14,6 @@ UTIL_PORT_SRCS=$(UTIL_PORT:.inc=.c)
 UTIL_OBJS+=$(UTIL_PORT_OBJS)
 
 TEST_SRCS=$(wildcard tests/*.c)
-TEST_OBJS=$(TEST_SRCS:.c=.o) $(TEST_SRCS:.c=)
 
 all: $(PROGS)
 
@@ -54,7 +53,7 @@ src/util/asprintf.c: src/util/asprintf.inc src/util/asprintf.fallback
 
 clean:
 	-rm -f $(PROGS)
-	-rm -f $(OBJS) $(TEST_OBJS)
+	-rm -f $(OBJS)
 	-rm -f $(UTIL_PORT_SRCS)
 	-rm -f src/util.a
 	-rm -f include/noreturn.h
