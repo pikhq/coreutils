@@ -31,25 +31,10 @@ include/noreturn.h: include/noreturn.inc
 		&& echo "#include <stdnoreturn.h>">include/noreturn.h \
 		|| cp include/noreturn.inc include/noreturn.h
 
-src/util/getopt_long.c: src/util/getopt_long.inc src/util/getopt_long.fallback
-	-$(CC) $(CFLAGS) $(CPPFLAGS) -o /dev/null tests/getopt_long.test.c $(LDLIBS) \
-		&& cp src/util/getopt_long.inc src/util/getopt_long.c \
-		|| cp src/util/getopt_long.fallback src/util/getopt_long.c
-
-src/util/klogctl.c: src/util/klogctl.inc src/util/klogctl.fallback
-	-$(CC) $(CFLAGS) $(CPPFLAGS) -o /dev/null tests/klogctl.test.c $(LDLIBS) \
-		&& cp src/util/klogctl.inc src/util/klogctl.c \
-		|| cp src/util/klogctl.fallback src/util/klogctl.c
-
-src/util/sethostname.c: src/util/sethostname.inc src/util/sethostname.fallback
-	-$(CC) $(CFLAGS) $(CPPFLAGS) -o /dev/null tests/sethostname.test.c $(LDLIBS) \
-		&& cp src/util/sethostname.inc src/util/sethostname.c \
-		|| cp src/util/sethostname.fallback src/util/sethostname.c
-
-src/util/asprintf.c: src/util/asprintf.inc src/util/asprintf.fallback
-	-$(CC) $(CFLAGS) $(CPPFLAGS) -o /dev/null tests/asprintf.test.c $(LDLIBS) \
-		&& cp src/util/asprintf.inc src/util/asprintf.c \
-		|| cp src/util/asprintf.fallback src/util/asprintf.c
+src/util/%.c: src/util/%.inc src/util/%.fallback tests/%.test.c
+	-$(CC) $(CFLAGS) $(CPPFLAGS) -o /dev/null tests/$*.test.c $(LDLIBS) \
+		&& cp src/util/$*.inc src/util/$*.c \
+		|| cp src/util/$*.fallback src/util/$*.c
 
 clean:
 	-rm -f $(PROGS)
