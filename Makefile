@@ -9,6 +9,7 @@ OBJS=$(SRCS:.c=.o)
 UTIL_SRCS=$(wildcard src/util/*.c)
 UTIL_PORT=$(wildcard src/util/*.inc)
 UTIL_PORT_SRCS=$(UTIL_PORT:.inc=.c)
+OBJS+=$(UTIL_PORT:.inc=.o)
 UTIL_SRCS+=$(UTIL_PORT_SRCS)
 UTIL_OBJS=$(UTIL_SRCS:.c=.o)
 
