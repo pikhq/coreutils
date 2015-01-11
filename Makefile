@@ -26,12 +26,12 @@ src/%: src/%.o src/util.a
 	$(CC) $(LDFLAGS) -o $@ $< src/util.a $(LDLIBS)
 
 include/noreturn.h: include/noreturn.inc
-	-$(CC) $(CFLAGS) $(CPPFLAGS) -o /dev/null tests/stdnoreturn.test.c \
+	-$(CC) $(CFLAGS) $(CPPFLAGS) -c -o /dev/null tests/stdnoreturn.test.c \
 		&& echo "#include <stdnoreturn.h>">include/noreturn.h \
 		|| cp include/noreturn.inc include/noreturn.h
 
 src/util/%.c: src/util/%.inc src/util/%.fallback tests/%.test.c
-	-$(CC) $(CFLAGS) $(CPPFLAGS) -o /dev/null tests/$*.test.c $(LDLIBS) \
+	-$(CC) $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) -o /dev/null tests/$*.test.c $(LDLIBS) \
 		&& cp src/util/$*.inc src/util/$*.c \
 		|| cp src/util/$*.fallback src/util/$*.c
 
