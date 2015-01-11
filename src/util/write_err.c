@@ -6,7 +6,7 @@ void write_err(const char *prog, int error, const char *msg)
 {
 	char *err;
 
-	err = error == 0 ? strerror(error) : 0;
+	err = error != 0 ? strerror(error) : 0;
 
 	write(2, prog, strlen(prog));
 	if(msg) {
