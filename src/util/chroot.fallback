@@ -1,0 +1,9 @@
+#include <errno.h>
+#include <unistd.h>
+#include "chroot.h"
+
+int chroot(const char *path)
+{
+	errno = ENOSYS;
+	return -1;
+}
